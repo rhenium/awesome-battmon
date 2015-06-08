@@ -1,5 +1,6 @@
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local awful = require("awful")
 local color = require("gears.color")
 local lgi = require("lgi")
 local cairo = lgi.cairo
@@ -26,12 +27,13 @@ local battery_status = function(adapter)
     file.close()
 
     local let = {
-        name =      ob["POWER_SUPPLY_NAME"],
-        status =    ob["POWER_SUPPLY_STATUS"], -- drivers/power/power_supply_sysfs.c: Unknown, Charging, Discharging, Not charging, Full
-        charging =  ob["POWER_SUPPLY_STATUS"] == "Charging",
-        capacity =  ob["POWER_SUPPLY_CAPACITY"],
-        present =   ob["POWER_SUPPLY_PRESENT"] == 1,
-        online =    ob["POWER_SUPPLY_ONLINE"] == 1, -- AC adapter
+        name =       ob["POWER_SUPPLY_NAME"],
+        status =     ob["POWER_SUPPLY_STATUS"], -- drivers/power/power_supply_sysfs.c: Unknown, Charging, Discharging, Not charging, Full
+        capacity =   ob["POWER_SUPPLY_CAPACITY"],
+        present =    ob["POWER_SUPPLY_PRESENT"] == 1,
+        energe_now = ob["POWER_SUPPLY_ENERGY_NOW"],
+        power_now =  ob["POWER_SUPPLY_POWER_NOW"],
+        online =     ob["POWER_SUPPLY_ONLINE"] == 1, -- AC adapter
     }
 
     return let
@@ -56,7 +58,7 @@ function battmon.draw(widget, wibox, cr, width, height)
     cr:set_font_size(font:get_size() / Pango.SCALE)
     local draw_color = color(config[widget].normal_color)
     if status.present then
-        if status.charging then
+        if status.status == "Charging" then
             draw_color = color(config[widget].charging_color)
         elseif status.capacity <= config[widget].critical then
             draw_color = color(config[widget].critical_color)
@@ -113,6 +115,18 @@ function battmon.draw(widget, wibox, cr, width, height)
     end
 
     cr:fill()
+
+    -- set tooltip
+    local tooltip_text = status.name .. ": " ..
+                         status.status .. ", " ..
+                         status.capacity .. "%"
+    if status.status == "Discharging" then
+        local hours = math.floor(status.energe_now / status.power_now)
+        local minutes = math.floor(60 * (status.energe_now / status.power_now - hours))
+        tooltip_text =  tooltip_text .. "\n" ..
+                        "estimated remaining: " .. hours .. " hours, " .. minutes .. " minutes"
+    end
+    config[widget].tooltip:set_text(tooltip_text)
 end
 
 function battmon.fit(widget, width, height)
@@ -133,6 +147,8 @@ function battmon.new(args)
         charging_color = args.charging_color or "#00ff00",
         warning_color = args.warning_color or "#ffff00",
         critical_color = args.critical_color or "#ff0000",
+
+        tooltip = awful.tooltip({ objects = { widget } }),
     }
 
     widget.draw = battmon.draw
