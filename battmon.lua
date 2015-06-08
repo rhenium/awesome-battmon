@@ -70,13 +70,13 @@ function battmon.draw(widget, wibox, cr, width, height)
     cr:set_source(draw_color)
     cr.fill_rule = "EVEN_ODD"
 
-    -- draw border ( margin-top: 2, margin-left: 0 )
-    cr:rectangle(0, 2, width, height - 4)
-    cr:rectangle(1, 3, width - 2, height - 6)
+    -- draw border ( margin-top: 2, margin-left: 1 )
+    cr:rectangle(1, 2, width - 2, height - 4)
+    cr:rectangle(2, 3, width - 4, height - 6)
 
-    local inner_width = width - 2
+    local inner_width = width - 4
     local inner_height = height - 6
-    cr:translate(1, 3)
+    cr:translate(2, 3)
 
     -- fill remaining
     cr:rectangle(0, 0, inner_width * status.capacity / 100, inner_height)
