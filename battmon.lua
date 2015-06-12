@@ -123,8 +123,9 @@ function battmon.draw(widget, wibox, cr, width, height)
     if status.status == "Discharging" then
         local hours = math.floor(status.energe_now / status.power_now)
         local minutes = math.floor(60 * (status.energe_now / status.power_now - hours))
+        local watts = math.floor(status.power_now / 1000 / 10) / 100 -- a.bc watts
         tooltip_text =  tooltip_text .. "\n" ..
-                        "estimated remaining: " .. hours .. " hours, " .. minutes .. " minutes"
+                        "estimated remaining: " .. hours .. " hours, " .. minutes .. " minutes (" .. watts .. " W)"
     end
     config[widget].tooltip:set_text(tooltip_text)
 end
