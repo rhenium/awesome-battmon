@@ -56,6 +56,7 @@ function battmon.draw(widget, wibox, cr, width, height)
     local font = Pango.FontDescription.from_string(beautiful.font)
     cr:select_font_face(font:get_family(), cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
     cr:set_font_size(font:get_size() / Pango.SCALE)
+
     local draw_color = color(config[widget].normal_color)
     if status.present then
         if status.status == "Charging" then
@@ -66,7 +67,6 @@ function battmon.draw(widget, wibox, cr, width, height)
             draw_color = color(config[widget].warning_color)
         end
     end
-
     cr:set_source(draw_color)
     cr.fill_rule = "EVEN_ODD"
 
@@ -92,11 +92,13 @@ function battmon.draw(widget, wibox, cr, width, height)
         local offset_y_charging = (inner_height - charging_height) / 2.0
         local offset_x_charging = offset_x_text + text_width + 2 -- 2 is padding
 
+        -- draw remaining percent
         cr:save()
         cr:move_to(offset_x_text, offset_y_text)
         cr:text_path(status.capacity)
         cr:restore()
 
+        -- draw charging icon
         cr:save()
         cr:translate(offset_x_charging, offset_y_charging)
         draw_charging(cr, charging_width, charging_height)
@@ -108,6 +110,7 @@ function battmon.draw(widget, wibox, cr, width, height)
         local offset_x_text = (inner_width - text_width) / 2.0
         local offset_y_text = (inner_height - text_height) / 2.0
 
+        -- draw remaining percent
         cr:save()
         cr:move_to(offset_x_text, offset_y_text)
         cr:text_path(status.capacity)
@@ -117,15 +120,17 @@ function battmon.draw(widget, wibox, cr, width, height)
     cr:fill()
 
     -- set tooltip
-    local tooltip_text = status.name .. ": " ..
-                         status.status .. ", " ..
-                         status.capacity .. "%"
+    local tooltip_text
     if status.status == "Discharging" then
         local hours = math.floor(status.energe_now / status.power_now)
         local minutes = math.floor(60 * (status.energe_now / status.power_now - hours))
         local watts = math.floor(status.power_now / 1000 / 10) / 100 -- a.bc watts
-        tooltip_text =  tooltip_text .. "\n" ..
-                        "estimated remaining: " .. hours .. " hours, " .. minutes .. " minutes (" .. watts .. " W)"
+        tooltip_text =
+            status.name .. ": " .. status.capacity .. "%, Discharging (" .. watts .. " W)\n" ..
+            "estimated remaining: " .. hours .. " hours, " .. minutes .. " minutes"
+    else
+        tooltip_text =
+            status.name .. ": " .. status.capacity .. "%, " .. status.status
     end
     config[widget].tooltip:set_text(tooltip_text)
 end
