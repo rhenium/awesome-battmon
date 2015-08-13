@@ -39,7 +39,8 @@ A simple battery monitor for awesome WM.
       normal_color = "#ffffff",
       charging_color = "#00ff00",
       warning_color = "#ffff00",
-      critical_color = "#ff0000"
+      critical_color = "#ff0000",
+      update_interval = 1
     })
     right_layout:add(bat0)
     ```

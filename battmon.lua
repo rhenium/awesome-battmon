@@ -10,7 +10,7 @@ local battmon = { mt = {} }
 
 local config = setmetatable({}, { __mode = "k" })
 
-local battery_status = function(adapter)
+local fetch_battery_status = function(adapter)
     local file = io.open("/sys/class/power_supply/" .. adapter .. "/uevent")
     if file == nil then return {} end
 
@@ -50,8 +50,8 @@ function draw_charging(cr, width, height)
 end
 
 function battmon.draw(widget, wibox, cr, width, height)
-    local ac_status = battery_status(config[widget].ac_adapter)
-    local status = battery_status(config[widget].battery)
+    local ac_status = config[widget].ac_status
+    local status = config[widget].battery_status
 
     local font = Pango.FontDescription.from_string(beautiful.font)
     cr:select_font_face(font:get_family(), cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
@@ -153,12 +153,26 @@ function battmon.new(args)
         charging_color = args.charging_color or "#00ff00",
         warning_color = args.warning_color or "#ffff00",
         critical_color = args.critical_color or "#ff0000",
+        update_interval = args.update_interval or 1,
 
         tooltip = awful.tooltip({ objects = { widget } }),
+        battery_status = nil,
+        ac_status = nil,
     }
 
     widget.draw = battmon.draw
     widget.fit = battmon.fit
+
+    -- setup timer
+    local bm_timer = timer { timeout = config[widget].update_interval }
+    local bm_cb = function()
+        config[widget].ac_status = fetch_battery_status(config[widget].ac_adapter)
+        config[widget].battery_status = fetch_battery_status(config[widget].battery)
+        bm_timer:again()
+    end
+    bm_cb() -- initial update
+    bm_timer:connect_signal("timeout", bm_cb)
+    bm_timer:start()
 
     return widget
 end
