@@ -24,7 +24,7 @@ local fetch_battery_status = function(adapter)
             ob[name] = value
         end
     end
-    file.close()
+    file:close()
 
     local let = {
         name =       ob["POWER_SUPPLY_NAME"],
