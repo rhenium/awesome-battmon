@@ -1,12 +1,17 @@
-# awesome-battmon
-A simple battery monitor for awesome WM.  
-バッテリーの残量を視覚的に表示する awesome WM のシンプルなウィジェットです。  
+awesome-battmon
+===============
 
-## Screenshots
-![2 batteries and one is critical](https://github.com/rhenium/awesome-battmon/raw/master/images/critical.png)  
-![2 batteries and one is charging](https://github.com/rhenium/awesome-battmon/raw/master/images/charging.png)  
+A simple battery monitor for awesome WM.
 
-## Installation
+Screenshots
+-----------
+
+![2 batteries and one is critical](https://github.com/rhenium/awesome-battmon/raw/images/critical.png)
+![2 batteries and one is charging](https://github.com/rhenium/awesome-battmon/raw/images/charging.png)
+
+Installation
+------------
+
 1. Clone this repository:
 
     ```sh
@@ -40,7 +45,15 @@ A simple battery monitor for awesome WM.
       charging_color = "#00ff00",
       warning_color = "#ffff00",
       critical_color = "#ff0000",
-      update_interval = 1
+      update_interval = 10 -- 10 seconds
     })
     right_layout:add(bat0)
     ```
+
+Copyright
+---------
+
+Copyright (c) 2015-2017 Kazuki Yamaguchi <k@rhe.jp>
+
+awesome-battmon is free software; you can redistribute it and/or modify it under
+the terms of the MIT license. See COPYING for details.
