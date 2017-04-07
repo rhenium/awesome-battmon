@@ -153,7 +153,7 @@ function battmon.new(args)
         charging_color = args.charging_color or "#00ff00",
         warning_color = args.warning_color or "#ffff00",
         critical_color = args.critical_color or "#ff0000",
-        update_interval = args.update_interval or 1,
+        update_interval = args.update_interval or 10,
 
         tooltip = awful.tooltip({ objects = { widget } }),
         battery_status = nil,
