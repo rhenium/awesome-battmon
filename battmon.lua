@@ -1,10 +1,11 @@
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local dpi = beautiful.xresources.apply_dpi
 local awful = require("awful")
 local color = require("gears.color")
 local lgi = require("lgi")
-local cairo = lgi.cairo
 local Pango = lgi.Pango
+local PangoCairo = lgi.PangoCairo
 
 local battmon = { mt = {} }
 
@@ -53,9 +54,15 @@ function battmon.draw(widget, wibox, cr, width, height)
     local ac_status = config[widget].ac_status
     local status = config[widget].battery_status
 
-    local font = Pango.FontDescription.from_string(beautiful.font)
-    cr:select_font_face(font:get_family(), cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
-    cr:set_font_size(font:get_size() / Pango.SCALE)
+    local ctx = PangoCairo.font_map_get_default():create_context()
+    ctx:set_resolution(beautiful.xresources.get_dpi())
+    local capacity_layout = Pango.Layout.new(ctx)
+    capacity_layout:set_text(status.capacity)
+    capacity_layout:set_font_description(beautiful.get_font(beautiful.font))
+
+    local _, logical = capacity_layout:get_pixel_extents()
+    local text_width = logical.width
+    local text_height = logical.height
 
     local draw_color = color(config[widget].normal_color)
     if status.present then
@@ -82,20 +89,17 @@ function battmon.draw(widget, wibox, cr, width, height)
     cr:rectangle(0, 0, inner_width * status.capacity / 100, inner_height)
 
     if ac_status.online then
-        local extents = cr:text_extents(status.capacity)
         local charging_height = inner_height
         local charging_width = charging_height / 2.0
-        local text_width = extents.width + extents.x_bearing * 2
-        local text_height = extents.height + extents.y_bearing * 2
-        local offset_x_text = (inner_width - charging_width - text_width + 2) / 2.0 -- 2 is padding
+        local offset_x_text = (inner_width - charging_width - text_width + dpi(2)) / 2.0 -- 2 is padding
         local offset_y_text = (inner_height - text_height) / 2.0
         local offset_y_charging = (inner_height - charging_height) / 2.0
-        local offset_x_charging = offset_x_text + text_width + 2 -- 2 is padding
+        local offset_x_charging = offset_x_text + text_width + dpi(2) -- 2 is padding
 
         -- draw remaining percent
         cr:save()
         cr:move_to(offset_x_text, offset_y_text)
-        cr:text_path(status.capacity)
+        cr:layout_path(capacity_layout)
         cr:restore()
 
         -- draw charging icon
@@ -104,16 +108,13 @@ function battmon.draw(widget, wibox, cr, width, height)
         draw_charging(cr, charging_width, charging_height)
         cr:restore()
     else
-        local extents = cr:text_extents(status.capacity)
-        local text_width = extents.width + extents.x_bearing * 2
-        local text_height = extents.height + extents.y_bearing * 2
         local offset_x_text = (inner_width - text_width) / 2.0
         local offset_y_text = (inner_height - text_height) / 2.0
 
         -- draw remaining percent
         cr:save()
         cr:move_to(offset_x_text, offset_y_text)
-        cr:text_path(status.capacity)
+        cr:layout_path(capacity_layout)
         cr:restore()
     end
 
@@ -146,9 +147,9 @@ function battmon.new(args)
     config[widget] = {
         battery = args.battery or "BAT0",
         ac_adapter = args.ac_adapter or "AC",
-        width = args.width or 48,
-        warning = args.warning or 30,
-        critical = args.critical or 10,
+        width = args.width or dpi(48),
+        warning = args.warning or dpi(30),
+        critical = args.critical or dpi(10),
         normal_color = args.normal_color or "#ffffff",
         charging_color = args.charging_color or "#00ff00",
         warning_color = args.warning_color or "#ffff00",
