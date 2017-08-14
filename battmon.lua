@@ -89,7 +89,7 @@ function battmon.draw(widget, wibox, cr, width, height)
     cr:rectangle(0, 0, inner_width * status.capacity / 100, inner_height)
 
     if ac_status.online then
-        local charging_height = inner_height
+        local charging_height = inner_height - dpi(inner_height * 0.05)
         local charging_width = charging_height / 2.0
         local offset_x_text = (inner_width - charging_width - text_width + dpi(2)) / 2.0 -- 2 is padding
         local offset_y_text = (inner_height - text_height) / 2.0
