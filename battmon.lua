@@ -2,6 +2,7 @@ local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local awful = require("awful")
+local gears = require("gears")
 local color = require("gears.color")
 local lgi = require("lgi")
 local Pango = lgi.Pango
@@ -165,15 +166,17 @@ function battmon.new(args)
     widget.fit = battmon.fit
 
     -- setup timer
-    local bm_timer = timer { timeout = config[widget].update_interval }
-    local bm_cb = function()
+    local update = function()
         config[widget].ac_status = fetch_battery_status(config[widget].ac_adapter)
         config[widget].battery_status = fetch_battery_status(config[widget].battery)
-        bm_timer:again()
     end
-    bm_cb() -- initial update
-    bm_timer:connect_signal("timeout", bm_cb)
-    bm_timer:start()
+    update()
+    gears.timer {
+        timeout = config[widget].update_interval,
+        autostart = true,
+        -- call_now = true, -- only master, not in 4.2
+        callback = update
+    }
 
     return widget
 end
