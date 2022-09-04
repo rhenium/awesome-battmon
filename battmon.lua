@@ -169,6 +169,7 @@ function battmon.new(args)
     local update = function()
         config[widget].ac_status = fetch_battery_status(config[widget].ac_adapter)
         config[widget].battery_status = fetch_battery_status(config[widget].battery)
+        widget:emit_signal("widget::redraw_needed")
     end
     update()
     gears.timer {
